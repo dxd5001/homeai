@@ -1,4 +1,6 @@
-# HomeAI
+# Home AI
+
+![Home AI Banner](static/banner.png)
 
 A home AI assistant built with LangChain. **Primarily uses local LLMs** with OpenAI as an optional provider.
 
