@@ -20,7 +20,7 @@ A home AI assistant built with LangChain. **Primarily uses local LLMs** with Ope
 ### 1. Clone repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/dxd5001/homeai.git
 cd homeai
 ```
 
