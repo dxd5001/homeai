@@ -53,8 +53,8 @@ Edit `.env`:
 ```bash
 # Use local LLM (default)
 USE_LOCAL_LLM=true
-LOCAL_LLM_BASE_URL=http://localhost:1234/v1
-LOCAL_LLM_MODEL=your-model-name
+LOCAL_LLM_BASE_URL=http://127.0.0.1:1235/v1  # Change to your LM Studio port
+LOCAL_LLM_MODEL=google/gemma-4-e4b  # Change to your actual model name
 
 # Use OpenAI (optional)
 # OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxx
@@ -63,9 +63,27 @@ LOCAL_LLM_MODEL=your-model-name
 
 ### 5. Run
 
+#### CLI Version
+
+Activate virtual environment and run the chatbot:
+
 ```bash
+source .venv/bin/activate   # macOS / Linux
+# .venv\Scripts\activate      # Windows
 python chatbot.py
 ```
+
+#### Web UI Version
+
+Activate virtual environment and run the Streamlit app:
+
+```bash
+source .venv/bin/activate   # macOS / Linux
+# .venv\Scripts\activate      # Windows
+streamlit run web_chatbot.py
+```
+
+The browser will automatically open at `http://localhost:8501`.
 
 ## Usage
 
