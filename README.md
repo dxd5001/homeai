@@ -103,7 +103,7 @@ You: quit
 Ending conversation. See you again!
 ```
 
-## Code Structure (Learning Points)
+## Code Structure
 
 | Step | Class / Function | Role |
 |---|---|---|
@@ -112,17 +112,6 @@ Ending conversation. See you again!
 | 3 | `prompt \| model \| StrOutputParser()` | LCEL chain construction |
 | 4 | `InMemoryChatMessageHistory` | In-memory conversation history management |
 | 5 | `RunnableWithMessageHistory` | Add history management to chain |
-
-## Future Extension Ideas
-
-- [ ] Allow system prompt changes via command line arguments
-- [ ] Save/load conversation history to/from files (JSON)
-- [ ] RAG (Retrieval-Augmented Generation): Reference documents like PDFs for answers
-- [ ] Create Web API with FastAPI for frontend integration
-- [ ] Visualize traces and debugging with LangSmith
-- [ ] Build more complex agents with LangGraph
-- [ ] Add local LLM model management features
-- [ ] Support multiple local LLM providers (Ollama, llama.cpp, etc.)
 
 ---
 
