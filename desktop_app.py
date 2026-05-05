@@ -16,7 +16,7 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QMainWindow,
 )
-from PyQt6.QtGui import QAction
+from PyQt6.QtGui import QAction, QKeySequence, QShortcut
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtCore import QUrl, QTimer
 
@@ -110,6 +110,9 @@ class HomeAIApp:
         if self.config.is_first_run():
             self.show_first_run_wizard()
 
+        # Setup global shortcut
+        self.setup_global_shortcut()
+
     def setup_tray_icon(self):
         """Setup system tray icon"""
         # Create tray icon (will use default icon for now)
@@ -149,6 +152,25 @@ class HomeAIApp:
             QSystemTrayIcon.MessageIcon.Information,
             3000,
         )
+
+    def setup_global_shortcut(self):
+        """Setup global shortcut to open web UI"""
+        # Detect platform
+        import platform
+
+        is_macos = platform.system() == "Darwin"
+
+        # Set shortcut key sequence
+        if is_macos:
+            # macOS: Cmd+Shift+H
+            shortcut_key = QKeySequence("Ctrl+Shift+H")
+        else:
+            # Windows/Linux: Ctrl+Shift+H
+            shortcut_key = QKeySequence("Ctrl+Shift+H")
+
+        # Create shortcut
+        shortcut = QShortcut(shortcut_key, self.app)
+        shortcut.activated.connect(self.open_web_ui)
 
     def show_first_run_wizard(self):
         """Show first-run setup wizard"""
