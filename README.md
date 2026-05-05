@@ -148,6 +148,33 @@ streamlit run web_chatbot.py
 
 The browser will automatically open at `http://localhost:8501`.
 
+#### Web Launcher
+
+The web launcher starts the Streamlit Web UI, opens the browser, and stays in the menu bar/tray so users can quit the Streamlit process easily.
+
+```bash
+source .venv/bin/activate   # macOS / Linux
+# .venv\Scripts\activate      # Windows
+python web_launcher.py
+```
+
+The launcher provides:
+- Starts Streamlit on `http://localhost:8501`
+- Opens the default browser automatically
+- Menu bar/tray menu to reopen Home AI
+- Tailscale Serve help link
+- Quit menu that stops Streamlit
+
+To build a standalone macOS launcher app:
+
+```bash
+pyinstaller --windowed --onedir --name "Home AI Web" web_launcher.py \
+  --add-data "web_chatbot.py:." \
+  --add-data "prompts.py:."
+```
+
+The output will be in `dist/Home AI Web.app`.
+
 ## Usage
 
 ```

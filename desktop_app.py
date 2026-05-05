@@ -26,8 +26,8 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from PyQt6.QtGui import QAction, QKeySequence, QShortcut
 from PyQt6.QtCore import QThread, pyqtSignal
+from PyQt6.QtGui import QAction, QKeySequence, QShortcut
 
 from config_manager import ConfigManager
 from config_wizard import ConfigWizard
@@ -222,6 +222,9 @@ class HomeAIApp:
                 5000,
             )
 
+        # Open chat window on startup
+        self.open_chat_window()
+
     def setup_tray_icon(self):
         """Setup system tray icon"""
         # Create tray icon with standard icon
@@ -231,12 +234,10 @@ class HomeAIApp:
         # Create context menu
         menu = QMenu()
 
-        # Open action
-        open_action = QAction("Open Home AI", self.app)
-        open_action.triggered.connect(self.open_chat_window)
-        menu.addAction(open_action)
-
-        menu.addSeparator()
+        # Open chat window action
+        open_chat_action = QAction("Open Chat Window", self.app)
+        open_chat_action.triggered.connect(self.open_chat_window)
+        menu.addAction(open_chat_action)
 
         # Settings action
         settings_action = QAction("Settings", self.app)
