@@ -82,7 +82,7 @@ python desktop_app.py
 The desktop application provides:
 - System tray icon for easy access
 - Setup wizard for first-time configuration
-- Embedded web UI with Streamlit
+- Native PyQt chat window
 - Settings menu for configuration changes
 
 #### CLI Version

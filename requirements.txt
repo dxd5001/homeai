@@ -10,4 +10,3 @@ streamlit==1.39.0
 
 # PyQt6 for desktop app
 PyQt6==6.7.0
-PyQt6-WebEngine==6.7.0
