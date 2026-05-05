@@ -84,7 +84,13 @@ class WebViewWindow(QMainWindow):
             QTimer.singleShot(3000, self.load_streamlit_url)
 
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to start Streamlit: {str(e)}")
+            # Show error message but don't crash
+            print(f"Failed to start Streamlit: {str(e)}")
+            QMessageBox.warning(
+                self,
+                "Streamlit Error",
+                "Failed to start Streamlit. Make sure LM Studio is running in API server mode.",
+            )
 
     def load_streamlit_url(self):
         """Load Streamlit URL in WebView"""
@@ -122,6 +128,15 @@ class HomeAIApp:
 
         # Setup global shortcut
         self.setup_global_shortcut()
+
+        # Show notification about LM Studio if using Local LLM
+        if self.config.get("use_local_llm", True):
+            self.tray_icon.showMessage(
+                "Home AI",
+                "Make sure LM Studio is running in API server mode before using the chat.",
+                QSystemTrayIcon.MessageIcon.Information,
+                5000,
+            )
 
     def setup_tray_icon(self):
         """Setup system tray icon"""
