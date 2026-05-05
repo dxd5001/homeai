@@ -93,11 +93,11 @@ To create a standalone macOS application bundle (.app):
 # Install PyInstaller
 pip install pyinstaller
 
-# Build the application
-pyinstaller --windowed --onefile --name "Home AI" desktop_app.py
+# Build the application (onedir mode for faster startup)
+pyinstaller --windowed --onedir --name "Home AI" desktop_app.py
 ```
 
-The output will be in `dist/Home AI.app`.
+The output will be in `dist/Home AI.app`. Using onedir mode provides faster startup (2-3 seconds) compared to onefile mode (30+ seconds).
 
 **Customizing the build:**
 
@@ -105,7 +105,7 @@ You can create a `.spec` file for more control:
 
 ```bash
 # Generate spec file
-pyinstaller --windowed --onefile --name "Home AI" desktop_app.py
+pyinstaller --windowed --onedir --name "Home AI" desktop_app.py
 
 # Edit the generated .spec file to customize:
 # - App name
