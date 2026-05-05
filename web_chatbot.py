@@ -116,22 +116,26 @@ def main():
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
+    # Get UI labels based on current language
+    ui_labels = PromptTemplates.get_ui_labels()
+    labels = ui_labels.get(LANGUAGE, ui_labels["en"])
+
     # Header
-    st.title("💬 Home AI")
-    st.caption("Home AI assistant built with LangChain + Streamlit")
+    st.title(f"💬 {labels['title']}")
+    st.caption(labels["caption"])
 
     # Sidebar: Settings
     with st.sidebar:
-        st.header("⚙️ Settings")
+        st.header(labels["settings"])
 
         # Language selection
         available_languages = PromptTemplates.get_available_languages()
         selected_language = st.selectbox(
-            "Language",
+            labels["language"],
             options=list(available_languages.keys()),
             format_func=lambda x: available_languages[x],
             index=list(available_languages.keys()).index(LANGUAGE),
-            help="Select the language for AI responses.",
+            help=labels["language_help"],
         )
 
         # Update language if changed
@@ -141,24 +145,24 @@ def main():
 
         # Session management
         session_id = st.text_input(
-            "Session ID",
+            labels["session_id"],
             value="default-session",
-            help="ID to identify conversations. Changing this starts a new conversation.",
+            help=labels["session_id_help"],
         )
 
         # Clear history button
-        if st.button("🗑️ Clear Conversation History", type="secondary"):
+        if st.button(labels["clear_history"], type="secondary"):
             st.session_state.messages = []
             st.session_state.store = {}
             st.rerun()
 
         # Model information
         st.divider()
-        st.subheader("📊 Model Information")
+        st.subheader(labels["model_info"])
 
         # Language info
         st.info(
-            f"Language: {available_languages.get(selected_language, selected_language)}"
+            f"{labels['language_info']}: {available_languages.get(selected_language, selected_language)}"
         )
         if USE_LOCAL_LLM:
             st.code(
@@ -173,7 +177,7 @@ def main():
             st.markdown(message["content"])
 
     # User input
-    if prompt := st.chat_input("Enter your message..."):
+    if prompt := st.chat_input(labels["input_placeholder"]):
         # Add user message
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
@@ -181,7 +185,7 @@ def main():
 
         # Generate AI response
         with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
+            with st.spinner(labels["thinking"]):
                 chain_with_history = get_chain_with_history()
                 response = chain_with_history.invoke(
                     {"input": prompt},
