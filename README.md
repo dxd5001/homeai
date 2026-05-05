@@ -85,6 +85,47 @@ The desktop application provides:
 - Native PyQt chat window
 - Settings menu for configuration changes
 
+#### Building Desktop Application
+
+To create a standalone macOS application bundle (.app):
+
+```bash
+# Install PyInstaller
+pip install pyinstaller
+
+# Build the application
+pyinstaller --windowed --onefile --name "Home AI" desktop_app.py
+```
+
+The output will be in `dist/Home AI.app`.
+
+**Customizing the build:**
+
+You can create a `.spec` file for more control:
+
+```bash
+# Generate spec file
+pyinstaller --windowed --onefile --name "Home AI" desktop_app.py
+
+# Edit the generated .spec file to customize:
+# - App name
+# - Icon (requires .icns file)
+# - Bundle identifier
+# - Info.plist settings
+
+# Rebuild with spec file
+pyinstaller --noconfirm homeai.spec
+```
+
+**Installing the application:**
+
+```bash
+# Copy to Applications folder
+cp -R dist/Home\ AI.app /Applications/
+
+# Launch from Applications or dock
+```
+
 #### CLI Version
 
 Activate virtual environment and run the chatbot:
