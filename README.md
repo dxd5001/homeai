@@ -170,7 +170,8 @@ To build a standalone macOS launcher app:
 ```bash
 pyinstaller --windowed --onedir --name "Home AI Web" web_launcher.py \
   --add-data "web_chatbot.py:." \
-  --add-data "prompts.py:."
+  --add-data "prompts.py:." \
+  --hidden-import "streamlit.web.cli"
 ```
 
 The output will be in `dist/Home AI Web.app`.

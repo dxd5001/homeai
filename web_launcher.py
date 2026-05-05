@@ -4,6 +4,7 @@ HomeAI Web Launcher
 Pystray-based launcher for the Streamlit web UI.
 """
 
+import os
 import socket
 import subprocess
 import sys
@@ -19,6 +20,7 @@ HOST = "127.0.0.1"
 PORT = 8501
 URL = f"http://localhost:{PORT}"
 STARTUP_TIMEOUT_SECONDS = 30
+STREAMLIT_CHILD_ARG = "--streamlit-child"
 
 streamlit_process = None
 tray_icon = None
@@ -72,23 +74,23 @@ def start_streamlit() -> None:
         return
 
     web_chatbot_path = get_web_chatbot_path()
-    command = [
-        sys.executable,
-        "-m",
-        "streamlit",
-        "run",
-        str(web_chatbot_path),
-        "--server.address",
-        HOST,
-        "--server.port",
-        str(PORT),
-        "--server.headless",
-        "true",
-    ]
+    if getattr(sys, "frozen", False):
+        command = [sys.executable, STREAMLIT_CHILD_ARG, str(web_chatbot_path)]
+    else:
+        command = [
+            sys.executable,
+            str(Path(__file__).resolve()),
+            STREAMLIT_CHILD_ARG,
+            str(web_chatbot_path),
+        ]
 
     streamlit_process = subprocess.Popen(
         command,
         cwd=str(get_base_path()),
+        env={
+            **os.environ,
+            "HOMEAI_STREAMLIT_CHILD": "1",
+        },
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
@@ -142,5 +144,32 @@ def main() -> None:
     tray_icon.run()
 
 
+def run_streamlit_child() -> None:
+    """Run Streamlit inside the child process without starting the launcher."""
+    try:
+        child_arg_index = sys.argv.index(STREAMLIT_CHILD_ARG)
+        app_path = sys.argv[child_arg_index + 1]
+    except (ValueError, IndexError):
+        raise SystemExit("Missing Streamlit app path.")
+
+    import streamlit.web.cli as streamlit_cli
+
+    sys.argv = [
+        "streamlit",
+        "run",
+        app_path,
+        "--server.address",
+        HOST,
+        "--server.port",
+        str(PORT),
+        "--server.headless",
+        "true",
+    ]
+    streamlit_cli.main()
+
+
 if __name__ == "__main__":
-    main()
+    if STREAMLIT_CHILD_ARG in sys.argv:
+        run_streamlit_child()
+    else:
+        main()
