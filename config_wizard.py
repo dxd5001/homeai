@@ -4,8 +4,6 @@ Configuration Wizard for HomeAI Desktop App
 Step-by-step setup wizard for first-time configuration
 """
 
-from pathlib import Path
-
 from PyQt6.QtWidgets import (
     QWizard,
     QWizardPage,
@@ -42,6 +40,22 @@ class ConfigWizard(QWizard):
         self.addPage(AutoStartPage(self.config))
         self.addPage(ConfirmationPage(self.config))
 
+    def nextId(self):
+        """Determine the next page ID based on current page and configuration"""
+        current_id = self.currentId()
+
+        # Skip OpenAIPage if Local LLM is selected
+        if current_id == 1:  # LLMChoicePage
+            if self.config.get("use_local_llm", True):
+                # Skip OpenAIPage (ID 3) and go to AutoStartPage (ID 4)
+                return 4
+            else:
+                # Go to OpenAIPage (ID 3)
+                return 3
+
+        # Default behavior: go to next page
+        return super().nextId()
+
     def accept(self):
         """Save configuration when wizard is accepted"""
         # Save configuration from all pages
@@ -76,12 +90,17 @@ class LanguagePage(QWizardPage):
                 self.language_combo.setCurrentIndex(i)
                 break
 
+        # Connect signal to enable/disable continue button
+        self.language_combo.currentIndexChanged.connect(self.completeChanged)
+
         layout.addWidget(language_label)
         layout.addWidget(self.language_combo)
         layout.addStretch()
         self.setLayout(layout)
 
-        self.registerField("language*", self.language_combo, "currentData")
+    def isComplete(self):
+        """Check if page is complete"""
+        return self.language_combo.currentData() is not None
 
     def initializePage(self):
         """Initialize page when shown"""
@@ -123,12 +142,18 @@ class LLMChoicePage(QWizardPage):
         else:
             self.openai_radio.setChecked(True)
 
+        # Connect signals to enable/disable continue button
+        self.local_radio.toggled.connect(self.completeChanged)
+        self.openai_radio.toggled.connect(self.completeChanged)
+
         layout.addWidget(self.local_radio)
         layout.addWidget(self.openai_radio)
         layout.addStretch()
         self.setLayout(layout)
 
-        self.registerField("use_local_llm*", self.local_radio, "checked")
+    def isComplete(self):
+        """Check if page is complete"""
+        return self.local_radio.isChecked() or self.openai_radio.isChecked()
 
     def validatePage(self):
         """Validate page before proceeding"""
@@ -173,6 +198,10 @@ class LocalLLMPage(QWizardPage):
             "Default LM Studio port is 1234, but you can change it in LM Studio settings."
         )
 
+        # Connect signals to enable/disable continue button
+        self.url_input.textChanged.connect(self.completeChanged)
+        self.model_input.textChanged.connect(self.completeChanged)
+
         layout.addWidget(url_label)
         layout.addWidget(self.url_input)
         layout.addWidget(model_label)
@@ -181,8 +210,9 @@ class LocalLLMPage(QWizardPage):
         layout.addStretch()
         self.setLayout(layout)
 
-        self.registerField("local_llm_base_url*", self.url_input)
-        self.registerField("local_llm_model*", self.model_input)
+    def isComplete(self):
+        """Check if page is complete"""
+        return bool(self.url_input.text().strip() and self.model_input.text().strip())
 
     def validatePage(self):
         """Validate page before proceeding"""
@@ -220,7 +250,7 @@ class OpenAIPage(QWizardPage):
         warning_text = QTextEdit()
         warning_text.setReadOnly(True)
         warning_text.setMaximumHeight(150)
-        warning_text.setStyleSheet("color: red;")
+        warning_text.setStyleSheet("color: orange;")
         warning_text.setText(
             "⚠️ WARNING: OpenAI API uses pay-as-you-go pricing.\n"
             "You will be charged based on your API usage.\n"
@@ -228,13 +258,18 @@ class OpenAIPage(QWizardPage):
             "We recommend using Local LLM for free and private usage."
         )
 
+        # Connect signal to enable/disable continue button
+        self.api_key_input.textChanged.connect(self.completeChanged)
+
         layout.addWidget(api_key_label)
         layout.addWidget(self.api_key_input)
         layout.addWidget(warning_text)
         layout.addStretch()
         self.setLayout(layout)
 
-        self.registerField("openai_api_key*", self.api_key_input)
+    def isComplete(self):
+        """Check if page is complete"""
+        return bool(self.api_key_input.text().strip())
 
     def validatePage(self):
         """Validate page before proceeding"""
@@ -317,18 +352,17 @@ class AutoStartPage(QWizardPage):
         layout.addStretch()
         self.setLayout(layout)
 
-        self.registerField("auto_start", self.auto_start_checkbox, "checked")
+    def isComplete(self):
+        """Check if page is complete"""
+        return True  # Auto-start is always valid (checkbox can be checked or unchecked)
 
     def validatePage(self):
         """Validate page before proceeding"""
         auto_start = self.auto_start_checkbox.isChecked()
         self.config.set("auto_start", auto_start)
 
-        # Enable/disable auto-start
-        if auto_start:
-            script_path = str(Path(__file__).parent / "desktop_app.py")
-            self.auto_start_manager.enable_auto_start(script_path)
-        else:
-            self.auto_start_manager.disable_auto_start()
+        # Enable/disable auto-start (do this after wizard completes)
+        # Don't do it here to avoid blocking the wizard
+        # This will be handled by the desktop app after wizard completes
 
         return True

@@ -15,13 +15,15 @@ from PyQt6.QtWidgets import (
     QMenu,
     QMessageBox,
     QMainWindow,
+    QStyle,
 )
-from PyQt6.QtGui import QAction, QKeySequence, QShortcut
+from PyQt6.QtGui import QAction, QKeySequence, QShortcut, QIcon
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtCore import QUrl, QTimer
 
 from config_manager import ConfigManager
 from config_wizard import ConfigWizard
+from auto_start import AutoStartManager
 
 
 class WebViewWindow(QMainWindow):
@@ -64,7 +66,15 @@ class WebViewWindow(QMainWindow):
 
             # Start Streamlit process
             self.streamlit_process = subprocess.Popen(
-                [sys.executable, "-m", "streamlit", "run", str(web_chatbot_path)],
+                [
+                    sys.executable,
+                    "-m",
+                    "streamlit",
+                    "run",
+                    str(web_chatbot_path),
+                    "--server.headless",
+                    "true",
+                ],
                 env=env,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
@@ -115,8 +125,9 @@ class HomeAIApp:
 
     def setup_tray_icon(self):
         """Setup system tray icon"""
-        # Create tray icon (will use default icon for now)
-        self.tray_icon = QSystemTrayIcon()
+        # Create tray icon with standard icon
+        icon = self.app.style().standardIcon(QStyle.StandardPixmap.SP_ComputerIcon)
+        self.tray_icon = QSystemTrayIcon(icon)
 
         # Create context menu
         menu = QMenu()
@@ -177,6 +188,14 @@ class HomeAIApp:
         wizard = ConfigWizard(self.config)
         if wizard.exec():
             # Wizard completed successfully
+            # Apply auto-start setting
+            auto_start_manager = AutoStartManager()
+            if self.config.get("auto_start", False):
+                script_path = str(Path(__file__))
+                auto_start_manager.enable_auto_start(script_path)
+            else:
+                auto_start_manager.disable_auto_start()
+
             QMessageBox.information(
                 None, "Setup Complete", "Home AI has been configured successfully!"
             )
