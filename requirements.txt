@@ -7,3 +7,7 @@ langchain-core==0.3.58
 openai==1.77.0
 python-dotenv==1.1.0
 streamlit==1.39.0
+
+# PyQt6 for desktop app
+PyQt6==6.7.0
+PyQt6-WebEngine==6.7.0
