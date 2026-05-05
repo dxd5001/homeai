@@ -10,6 +10,10 @@ A home AI assistant built with LangChain. **Primarily uses local LLMs** with Ope
 .
 ├── chatbot.py        # CLI chatbot with multi-language support
 ├── web_chatbot.py    # Streamlit web interface
+├── desktop_app.py    # PyQt6 desktop application
+├── config_manager.py # Configuration file management
+├── config_wizard.py  # Setup wizard for first-time configuration
+├── auto_start.py     # Auto-start configuration for OS
 ├── prompts.py        # Multi-language prompt templates
 ├── requirements.txt  # Dependencies
 ├── .env.example      # Environment configuration
@@ -64,6 +68,36 @@ LOCAL_LLM_MODEL=google/gemma-4-e4b  # Change to your actual model name
 ```
 
 ### 5. Run
+
+#### Desktop Application (Recommended)
+
+Activate virtual environment and run the desktop application:
+
+```bash
+source .venv/bin/activate   # macOS / Linux
+# .venv\Scripts\activate      # Windows
+python desktop_app.py
+```
+
+The desktop application provides:
+- System tray icon for easy access
+- Setup wizard for first-time configuration
+- Embedded web UI with Streamlit
+- Settings menu for configuration changes
+
+#### Building Executable with PyInstaller
+
+To create a standalone executable:
+
+```bash
+# Install PyInstaller
+pip install pyinstaller
+
+# Build executable
+pyinstaller --windowed --onefile desktop_app.py
+```
+
+The executable will be created in the `dist` directory. On macOS, a `.app` bundle will be created.
 
 #### CLI Version
 
