@@ -5,6 +5,7 @@ Pystray-based launcher for the Streamlit web UI.
 """
 
 import os
+import shutil
 import socket
 import subprocess
 import sys
@@ -21,6 +22,12 @@ PORT = 8501
 URL = f"http://localhost:{PORT}"
 STARTUP_TIMEOUT_SECONDS = 30
 STREAMLIT_CHILD_ARG = "--streamlit-child"
+TAILSCALE_CANDIDATE_PATHS = [
+    "/Applications/Tailscale.app/Contents/MacOS/Tailscale",
+    "/opt/homebrew/bin/tailscale",
+    "/usr/local/bin/tailscale",
+    "/usr/bin/tailscale",
+]
 
 streamlit_process = None
 tray_icon = None
@@ -125,6 +132,56 @@ def show_tailscale_help() -> None:
     webbrowser.open("https://tailscale.com/kb/1312/serve")
 
 
+def find_tailscale_command() -> str | None:
+    """Find the Tailscale command path."""
+    for candidate_path in TAILSCALE_CANDIDATE_PATHS:
+        if Path(candidate_path).exists():
+            return candidate_path
+    return shutil.which("tailscale")
+
+
+def run_tailscale_command(args: list[str]) -> subprocess.CompletedProcess[str] | None:
+    """Run a Tailscale command and write the result to the launcher log."""
+    tailscale_command = find_tailscale_command()
+    if tailscale_command is None:
+        write_log("Tailscale command not found.")
+        show_tailscale_help()
+        return None
+
+    command = [tailscale_command, *args]
+    write_log(f"Tailscale command: {' '.join(command)}")
+    result = subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    write_log(f"Tailscale return code: {result.returncode}")
+    if result.stdout:
+        write_log(f"Tailscale stdout: {result.stdout.strip()}")
+    if result.stderr:
+        write_log(f"Tailscale stderr: {result.stderr.strip()}")
+    return result
+
+
+def show_tailscale_status() -> None:
+    """Log current Tailscale Serve status."""
+    run_tailscale_command(["serve", "status"])
+
+
+def start_tailscale_serve() -> None:
+    """Start Tailscale Serve for the Streamlit port."""
+    show_tailscale_status()
+    run_tailscale_command(["serve", "--bg", str(PORT)])
+    show_tailscale_status()
+
+
+def stop_tailscale_serve() -> None:
+    """Reset Tailscale Serve configuration."""
+    run_tailscale_command(["serve", "reset"])
+
+
 def quit_app(icon: pystray.Icon) -> None:
     """Stop Streamlit and quit the tray application."""
     global streamlit_process
@@ -143,6 +200,9 @@ def setup_tray() -> pystray.Icon:
     """Create and return tray icon."""
     menu = pystray.Menu(
         pystray.MenuItem("Open Home AI", lambda: open_home_ai()),
+        pystray.MenuItem("Start Tailscale Serve", lambda: start_tailscale_serve()),
+        pystray.MenuItem("Stop Tailscale Serve", lambda: stop_tailscale_serve()),
+        pystray.MenuItem("Show Tailscale Status", lambda: show_tailscale_status()),
         pystray.MenuItem("Tailscale Serve Help", lambda: show_tailscale_help()),
         pystray.MenuItem("Quit", quit_app),
     )

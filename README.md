@@ -83,8 +83,15 @@ The launcher provides:
 - Starts Streamlit on `http://localhost:8501`
 - Opens the default browser automatically
 - Menu bar/tray menu to reopen Home AI
+- Start Tailscale Serve for port `8501`
+- Stop Tailscale Serve
+- Show Tailscale Serve status in `~/.homeai/logs/web_launcher.log`
 - Tailscale Serve help link
 - Quit menu that stops Streamlit
+
+The launcher automatically looks for the Tailscale command in common locations, including `/Applications/Tailscale.app/Contents/MacOS/Tailscale`, Homebrew paths, and `PATH`.
+
+**Note**: `Stop Tailscale Serve` runs `tailscale serve reset`, which may remove other Tailscale Serve settings on the machine.
 
 #### Building Web Launcher
 
