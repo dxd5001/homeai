@@ -184,6 +184,12 @@ tailscale serve --bg 8501
 
 Now accessible at `https://your-tailnet-name.ts.net` within your Tailnet.
 
+![Tailscale Dashboard](static/tailscale_1.png)
+
+<div style='text-align: center; color: gray; font-size: 0.9em; margin: 10px 0;'>
+    Click the Address of the machine running Home AI to see the FQDN
+</div>
+
 #### 5. Access from smartphone
 
 1. Install Tailscale app on smartphone
