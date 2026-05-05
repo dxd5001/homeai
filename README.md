@@ -69,35 +69,40 @@ LOCAL_LLM_MODEL=google/gemma-4-e4b  # Change to your actual model name
 
 ### 5. Run
 
-#### Desktop Application (Recommended)
+#### Web Launcher (Recommended)
 
-Activate virtual environment and run the desktop application:
+The recommended way to run Home AI is the Web Launcher. It starts the Streamlit Web UI, opens the browser, and stays in the menu bar/tray so users can quit the Streamlit process easily.
 
 ```bash
 source .venv/bin/activate   # macOS / Linux
 # .venv\Scripts\activate      # Windows
-python desktop_app.py
+python web_launcher.py
 ```
 
-The desktop application provides:
-- System tray icon for easy access
-- Setup wizard for first-time configuration
-- Native PyQt chat window
-- Settings menu for configuration changes
+The launcher provides:
+- Starts Streamlit on `http://localhost:8501`
+- Opens the default browser automatically
+- Menu bar/tray menu to reopen Home AI
+- Tailscale Serve help link
+- Quit menu that stops Streamlit
 
-#### Building Desktop Application
+#### Building Web Launcher
 
-To create a standalone macOS application bundle (.app):
+To create a standalone macOS launcher application bundle (.app):
 
 ```bash
 # Install PyInstaller
 pip install pyinstaller
 
-# Build the application (onedir mode for faster startup)
-pyinstaller --windowed --onedir --name "Home AI" desktop_app.py
+# Build the launcher
+pyinstaller --windowed --onedir --name "Home AI Launcher" web_launcher.py \
+  --add-data "web_chatbot.py:." \
+  --add-data "prompts.py:." \
+  --collect-all streamlit \
+  --hidden-import "streamlit.web.cli"
 ```
 
-The output will be in `dist/Home AI.app`. Using onedir mode provides faster startup (2-3 seconds) compared to onefile mode (30+ seconds).
+The output will be in `dist/Home AI Launcher.app`.
 
 **Customizing the build:**
 
@@ -105,7 +110,7 @@ You can create a `.spec` file for more control:
 
 ```bash
 # Generate spec file
-pyinstaller --windowed --onedir --name "Home AI" desktop_app.py
+pyinstaller --windowed --onedir --name "Home AI Launcher" web_launcher.py
 
 # Edit the generated .spec file to customize:
 # - App name
@@ -121,10 +126,34 @@ pyinstaller --noconfirm homeai.spec
 
 ```bash
 # Copy to Applications folder
-cp -R dist/Home\ AI.app /Applications/
+cp -R dist/Home\ AI\ Launcher.app /Applications/
 
 # Launch from Applications or dock
 ```
+
+#### Native Desktop Application (Alternative)
+
+Home AI also includes an alternative native PyQt desktop application. The Web Launcher is recommended for general use, but the native app can be useful as an experimental or fallback implementation.
+
+```bash
+source .venv/bin/activate   # macOS / Linux
+# .venv\Scripts\activate      # Windows
+python desktop_app.py
+```
+
+The native desktop application provides:
+- System tray icon for easy access
+- Setup wizard for first-time configuration
+- Native PyQt chat window
+- Settings menu for configuration changes
+
+To build the native desktop application:
+
+```bash
+pyinstaller --windowed --onedir --name "Home AI" desktop_app.py
+```
+
+The output will be in `dist/Home AI.app`.
 
 #### CLI Version
 
@@ -147,34 +176,6 @@ streamlit run web_chatbot.py
 ```
 
 The browser will automatically open at `http://localhost:8501`.
-
-#### Web Launcher
-
-The web launcher starts the Streamlit Web UI, opens the browser, and stays in the menu bar/tray so users can quit the Streamlit process easily.
-
-```bash
-source .venv/bin/activate   # macOS / Linux
-# .venv\Scripts\activate      # Windows
-python web_launcher.py
-```
-
-The launcher provides:
-- Starts Streamlit on `http://localhost:8501`
-- Opens the default browser automatically
-- Menu bar/tray menu to reopen Home AI
-- Tailscale Serve help link
-- Quit menu that stops Streamlit
-
-To build a standalone macOS launcher app:
-
-```bash
-pyinstaller --windowed --onedir --name "Home AI Web" web_launcher.py \
-  --add-data "web_chatbot.py:." \
-  --add-data "prompts.py:." \
-  --hidden-import "streamlit.web.cli"
-```
-
-The output will be in `dist/Home AI Web.app`.
 
 ## Usage
 

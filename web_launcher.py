@@ -15,7 +15,7 @@ from pathlib import Path
 import pystray
 from PIL import Image, ImageDraw
 
-APP_NAME = "Home AI Web"
+APP_NAME = "Home AI Launcher"
 HOST = "127.0.0.1"
 PORT = 8501
 URL = f"http://localhost:{PORT}"
@@ -36,6 +36,20 @@ def get_base_path() -> Path:
 def get_web_chatbot_path() -> Path:
     """Return the Streamlit application path."""
     return get_base_path() / "web_chatbot.py"
+
+
+def get_log_path() -> Path:
+    """Return launcher log file path."""
+    log_dir = Path.home() / ".homeai" / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    return log_dir / "web_launcher.log"
+
+
+def write_log(message: str) -> None:
+    """Write a message to the launcher log file."""
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    with open(get_log_path(), "a", encoding="utf-8") as log_file:
+        log_file.write(f"[{timestamp}] {message}\n")
 
 
 def is_port_open(host: str, port: int) -> bool:
@@ -71,9 +85,11 @@ def start_streamlit() -> None:
     global streamlit_process
 
     if is_port_open(HOST, PORT):
+        write_log(f"Streamlit is already running at {URL}")
         return
 
     web_chatbot_path = get_web_chatbot_path()
+    write_log(f"Starting Streamlit with app path: {web_chatbot_path}")
     if getattr(sys, "frozen", False):
         command = [sys.executable, STREAMLIT_CHILD_ARG, str(web_chatbot_path)]
     else:
@@ -84,6 +100,8 @@ def start_streamlit() -> None:
             str(web_chatbot_path),
         ]
 
+    write_log(f"Streamlit command: {' '.join(command)}")
+    log_file = open(get_log_path(), "a", encoding="utf-8")
     streamlit_process = subprocess.Popen(
         command,
         cwd=str(get_base_path()),
@@ -91,9 +109,10 @@ def start_streamlit() -> None:
             **os.environ,
             "HOMEAI_STREAMLIT_CHILD": "1",
         },
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stdout=log_file,
+        stderr=log_file,
     )
+    write_log(f"Streamlit process started with PID: {streamlit_process.pid}")
 
 
 def open_home_ai() -> None:
@@ -134,10 +153,18 @@ def main() -> None:
     """Start Streamlit, open browser, and run tray icon."""
     global tray_icon
 
+    write_log("Launcher started")
     start_streamlit()
     if wait_for_streamlit():
+        write_log(f"Streamlit is ready at {URL}")
         open_home_ai()
     else:
+        if streamlit_process is not None:
+            write_log(
+                f"Streamlit did not become ready. Return code: {streamlit_process.poll()}"
+            )
+        else:
+            write_log("Streamlit did not become ready. No process was started.")
         webbrowser.open(URL)
 
     tray_icon = setup_tray()
@@ -164,6 +191,8 @@ def run_streamlit_child() -> None:
         str(PORT),
         "--server.headless",
         "true",
+        "--global.developmentMode",
+        "false",
     ]
     streamlit_cli.main()
 
