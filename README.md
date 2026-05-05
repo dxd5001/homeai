@@ -85,20 +85,6 @@ The desktop application provides:
 - Embedded web UI with Streamlit
 - Settings menu for configuration changes
 
-#### Building Executable with PyInstaller
-
-To create a standalone executable:
-
-```bash
-# Install PyInstaller
-pip install pyinstaller
-
-# Build executable
-pyinstaller --windowed --onefile desktop_app.py
-```
-
-The executable will be created in the `dist` directory. On macOS, a `.app` bundle will be created.
-
 #### CLI Version
 
 Activate virtual environment and run the chatbot:
