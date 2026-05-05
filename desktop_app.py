@@ -199,10 +199,8 @@ class HomeAIApp:
 
     def open_settings(self):
         """Open settings dialog"""
-        # TODO: Launch settings dialog
-        QMessageBox.information(
-            None, "Home AI", "Settings dialog will be opened here (TODO: implement)"
-        )
+        wizard = ConfigWizard(self.config)
+        wizard.exec()
 
     def quit_app(self):
         """Quit the application"""

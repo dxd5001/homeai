@@ -4,6 +4,8 @@ Configuration Wizard for HomeAI Desktop App
 Step-by-step setup wizard for first-time configuration
 """
 
+from pathlib import Path
+
 from PyQt6.QtWidgets import (
     QWizard,
     QWizardPage,
@@ -15,9 +17,11 @@ from PyQt6.QtWidgets import (
     QButtonGroup,
     QTextEdit,
     QMessageBox,
+    QCheckBox,
 )
 
 from config_manager import ConfigManager
+from auto_start import AutoStartManager
 
 
 class ConfigWizard(QWizard):
@@ -35,6 +39,7 @@ class ConfigWizard(QWizard):
         self.addPage(LLMChoicePage(self.config))
         self.addPage(LocalLLMPage(self.config))
         self.addPage(OpenAIPage(self.config))
+        self.addPage(AutoStartPage(self.config))
         self.addPage(ConfirmationPage(self.config))
 
     def accept(self):
@@ -266,6 +271,7 @@ class ConfirmationPage(QWizardPage):
         """Initialize page when shown"""
         language = self.config.get("language", "ja")
         use_local = self.config.get("use_local_llm", True)
+        auto_start = self.config.get("auto_start", False)
 
         summary = f"Language: {language}\n\n"
 
@@ -277,4 +283,52 @@ class ConfirmationPage(QWizardPage):
             summary += "LLM Provider: OpenAI API\n"
             summary += f"API Key: {'*' * 20}\n"  # Mask API key
 
+        summary += f"\nAuto-start: {'Enabled' if auto_start else 'Disabled'}\n"
+
         self.summary_text.setText(summary)
+
+
+class AutoStartPage(QWizardPage):
+    """Auto-start configuration page"""
+
+    def __init__(self, config: ConfigManager):
+        super().__init__()
+        self.config = config
+        self.auto_start_manager = AutoStartManager()
+        self.setTitle("Auto-start")
+        self.setSubTitle("Configure auto-start on system boot")
+
+        layout = QVBoxLayout()
+
+        self.auto_start_checkbox = QCheckBox("Enable auto-start on system boot")
+        self.auto_start_checkbox.setChecked(self.config.get("auto_start", False))
+
+        # Help text
+        help_text = QTextEdit()
+        help_text.setReadOnly(True)
+        help_text.setMaximumHeight(100)
+        help_text.setText(
+            "If enabled, Home AI will automatically start when you log in to your computer.\n"
+            "You can always change this setting later from the Settings menu."
+        )
+
+        layout.addWidget(self.auto_start_checkbox)
+        layout.addWidget(help_text)
+        layout.addStretch()
+        self.setLayout(layout)
+
+        self.registerField("auto_start", self.auto_start_checkbox, "checked")
+
+    def validatePage(self):
+        """Validate page before proceeding"""
+        auto_start = self.auto_start_checkbox.isChecked()
+        self.config.set("auto_start", auto_start)
+
+        # Enable/disable auto-start
+        if auto_start:
+            script_path = str(Path(__file__).parent / "desktop_app.py")
+            self.auto_start_manager.enable_auto_start(script_path)
+        else:
+            self.auto_start_manager.disable_auto_start()
+
+        return True
