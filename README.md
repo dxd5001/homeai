@@ -89,7 +89,7 @@ The launcher provides:
 - Tailscale Serve help link
 - Quit menu that stops Streamlit
 
-The launcher automatically looks for the Tailscale command in common locations, including `/Applications/Tailscale.app/Contents/MacOS/Tailscale`, Homebrew paths, and `PATH`.
+The launcher automatically looks for the Tailscale CLI command in common locations, including Homebrew paths and `PATH`.
 
 **Note**: `Stop Tailscale Serve` runs `tailscale serve reset`, which may remove other Tailscale Serve settings on the machine.
 

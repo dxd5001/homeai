@@ -23,7 +23,6 @@ URL = f"http://localhost:{PORT}"
 STARTUP_TIMEOUT_SECONDS = 30
 STREAMLIT_CHILD_ARG = "--streamlit-child"
 TAILSCALE_CANDIDATE_PATHS = [
-    "/Applications/Tailscale.app/Contents/MacOS/Tailscale",
     "/opt/homebrew/bin/tailscale",
     "/usr/local/bin/tailscale",
     "/usr/bin/tailscale",
@@ -162,6 +161,9 @@ def run_tailscale_command(args: list[str]) -> subprocess.CompletedProcess[str] |
         write_log(f"Tailscale stdout: {result.stdout.strip()}")
     if result.stderr:
         write_log(f"Tailscale stderr: {result.stderr.strip()}")
+    if "Tailscale GUI failed to start" in result.stdout:
+        write_log("Detected Tailscale app binary instead of a usable CLI command.")
+        show_tailscale_help()
     return result
 
 
