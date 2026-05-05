@@ -158,6 +158,26 @@ streamlit run web_chatbot.py
 
 #### 4. Expose with Tailscale Serve
 
+**First, enable Tailscale CLI:**
+
+**macOS:**
+Add alias to `~/.zshrc`:
+```bash
+echo "alias tailscale='/Applications/Tailscale.app/Contents/MacOS/Tailscale'" >> ~/.zshrc
+source ~/.zshrc
+```
+
+**Windows:**
+Add Tailscale to PATH or use PowerShell:
+```powershell
+# Add to PATH (requires admin privileges)
+$env:Path += ";C:\Program Files\Tailscale\"
+# Or use full path directly
+& "C:\Program Files\Tailscale\tailscale.exe" serve --bg 8501
+```
+
+**Then expose the app:**
+
 ```bash
 tailscale serve --bg 8501
 ```
