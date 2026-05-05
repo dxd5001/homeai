@@ -4,18 +4,88 @@ HomeAI Desktop Application
 PyQt6-based desktop app with system tray integration
 """
 
+import os
+import subprocess
 import sys
+from pathlib import Path
 
 from PyQt6.QtWidgets import (
     QApplication,
     QSystemTrayIcon,
     QMenu,
     QMessageBox,
+    QMainWindow,
 )
 from PyQt6.QtGui import QAction
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtCore import QUrl, QTimer
 
 from config_manager import ConfigManager
 from config_wizard import ConfigWizard
+
+
+class WebViewWindow(QMainWindow):
+    """WebView window for Streamlit UI"""
+
+    def __init__(self, config: ConfigManager):
+        super().__init__()
+        self.config = config
+        self.streamlit_process = None
+        self.setWindowTitle("Home AI")
+        self.resize(1200, 800)
+
+        # Setup WebView
+        self.web_view = QWebEngineView()
+        self.setCentralWidget(self.web_view)
+
+        # Start Streamlit
+        self.start_streamlit()
+
+    def start_streamlit(self):
+        """Start Streamlit process"""
+        try:
+            # Get script directory
+            script_dir = Path(__file__).parent
+            web_chatbot_path = script_dir / "web_chatbot.py"
+
+            # Set environment variables from config
+            env = os.environ.copy()
+            env["USE_LOCAL_LLM"] = str(self.config.get("use_local_llm", True)).lower()
+            env["LOCAL_LLM_BASE_URL"] = self.config.get(
+                "local_llm_base_url", "http://127.0.0.1:1235/v1"
+            )
+            env["LOCAL_LLM_MODEL"] = self.config.get(
+                "local_llm_model", "google/gemma-4-e4b"
+            )
+            env["LANGUAGE"] = self.config.get("language", "ja")
+
+            if not self.config.get("use_local_llm", True):
+                env["OPENAI_API_KEY"] = self.config.get("openai_api_key", "")
+
+            # Start Streamlit process
+            self.streamlit_process = subprocess.Popen(
+                [sys.executable, "-m", "streamlit", "run", str(web_chatbot_path)],
+                env=env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+
+            # Wait a bit for Streamlit to start
+            QTimer.singleShot(3000, self.load_streamlit_url)
+
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to start Streamlit: {str(e)}")
+
+    def load_streamlit_url(self):
+        """Load Streamlit URL in WebView"""
+        self.web_view.setUrl(QUrl("http://localhost:8501"))
+
+    def closeEvent(self, event):
+        """Handle window close event"""
+        if self.streamlit_process:
+            self.streamlit_process.terminate()
+            self.streamlit_process.wait()
+        event.accept()
 
 
 class HomeAIApp:
@@ -28,6 +98,9 @@ class HomeAIApp:
 
         # Load configuration
         self.config = ConfigManager()
+
+        # WebView window
+        self.web_view_window = None
 
         # Setup system tray
         self.tray_icon = None
@@ -95,10 +168,12 @@ class HomeAIApp:
 
     def open_web_ui(self):
         """Open the Streamlit web UI"""
-        # TODO: Launch Streamlit in WebView
-        QMessageBox.information(
-            None, "Home AI", "Web UI will be opened here (TODO: implement WebView)"
-        )
+        if self.web_view_window is None or not self.web_view_window.isVisible():
+            self.web_view_window = WebViewWindow(self.config)
+            self.web_view_window.show()
+        else:
+            self.web_view_window.raise_()
+            self.web_view_window.activateWindow()
 
     def open_settings(self):
         """Open settings dialog"""
