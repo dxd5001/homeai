@@ -9,6 +9,7 @@ Browser will automatically open at http://localhost:8501
 
 import os
 import sys
+import base64
 from pathlib import Path
 
 import streamlit as st
@@ -51,8 +52,18 @@ def load_image(filename: str) -> Image.Image | None:
     return None
 
 
+def get_image_data_uri(filename: str) -> str | None:
+    """Return a static image as a data URI."""
+    image_path = get_static_image_path(filename)
+    if not image_path.exists():
+        return None
+
+    encoded_image = base64.b64encode(image_path.read_bytes()).decode("ascii")
+    return f"data:image/png;base64,{encoded_image}"
+
+
 PAGE_ICON = load_image("homeai_logo-8.png") or "💬"
-HEADER_LOGO = load_image("homeai_logo@2x.png")
+HEADER_LOGO_DATA_URI = get_image_data_uri("homeai_logo@2x.png")
 
 # -----------------------------------------------
 # Streamlit page configuration
@@ -149,12 +160,16 @@ def main():
     labels = ui_labels.get(LANGUAGE, ui_labels["en"])
 
     # Header
-    if HEADER_LOGO is not None:
-        left_column, right_column = st.columns([1, 5], vertical_alignment="center")
-        with left_column:
-            st.image(HEADER_LOGO, width=72)
-        with right_column:
-            st.title(labels["title"])
+    if HEADER_LOGO_DATA_URI is not None:
+        st.markdown(
+            f"""
+            <h1 style="display: flex; align-items: center; gap: 0.5rem;">
+                <img src="{HEADER_LOGO_DATA_URI}" alt="Home AI" style="width: 56px; height: 56px;">
+                <span>{labels["title"]}</span>
+            </h1>
+            """,
+            unsafe_allow_html=True,
+        )
     else:
         st.title(f"💬 {labels['title']}")
     st.caption(labels["caption"])
