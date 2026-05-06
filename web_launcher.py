@@ -5,6 +5,7 @@ Pystray-based launcher for the Streamlit web UI.
 """
 
 import os
+import shlex
 import shutil
 import socket
 import subprocess
@@ -28,6 +29,12 @@ TAILSCALE_CANDIDATE_PATHS = [
     "/opt/homebrew/bin/tailscale",
     "/usr/bin/tailscale",
 ]
+TAILSCALE_APP_PATH = Path("/Applications/Tailscale.app")
+TAILSCALE_CLI_INSTALL_SCRIPT_PATH = (
+    TAILSCALE_APP_PATH / "Contents" / "Resources" / "InstallTailscaleCLI.scpt"
+)
+TAILSCALE_APP_BINARY_PATH = TAILSCALE_APP_PATH / "Contents" / "MacOS" / "Tailscale"
+TAILSCALE_CLI_WRAPPER_PATH = Path("/usr/local/bin/tailscale")
 
 streamlit_process = None
 tray_icon = None
@@ -154,6 +161,11 @@ def show_tailscale_help() -> None:
     webbrowser.open("https://tailscale.com/kb/1312/serve")
 
 
+def quote_applescript_string(value: str) -> str:
+    """Quote a string for AppleScript source."""
+    return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
 def find_tailscale_command() -> str | None:
     """Find the Tailscale command path."""
     for candidate_path in TAILSCALE_CANDIDATE_PATHS:
@@ -162,15 +174,98 @@ def find_tailscale_command() -> str | None:
     return shutil.which("tailscale")
 
 
+def install_tailscale_cli() -> bool:
+    """Install the Tailscale CLI using the official bundled installer."""
+    if not TAILSCALE_APP_PATH.exists():
+        write_log("Tailscale app not found at /Applications/Tailscale.app.")
+        show_tailscale_help()
+        return False
+
+    if not TAILSCALE_CLI_INSTALL_SCRIPT_PATH.exists():
+        write_log(
+            f"Tailscale CLI installer not found: {TAILSCALE_CLI_INSTALL_SCRIPT_PATH}"
+        )
+        show_tailscale_help()
+        return False
+
+    write_log(f"Running Tailscale CLI installer: {TAILSCALE_CLI_INSTALL_SCRIPT_PATH}")
+    result = subprocess.run(
+        ["osascript", str(TAILSCALE_CLI_INSTALL_SCRIPT_PATH)],
+        capture_output=True,
+        text=True,
+        timeout=120,
+        check=False,
+    )
+    write_log(f"Tailscale CLI installer return code: {result.returncode}")
+    if result.stdout:
+        write_log(f"Tailscale CLI installer stdout: {result.stdout.strip()}")
+    if result.stderr:
+        write_log(f"Tailscale CLI installer stderr: {result.stderr.strip()}")
+
+    if result.returncode == 0 and find_tailscale_command() is not None:
+        write_log("Tailscale CLI installed successfully.")
+        return True
+
+    write_log("Tailscale CLI installer did not make a usable CLI command available.")
+    if install_tailscale_cli_wrapper():
+        return True
+
+    show_tailscale_help()
+    return False
+
+
+def install_tailscale_cli_wrapper() -> bool:
+    """Install a Tailscale CLI wrapper when the bundled installer fails."""
+    if not TAILSCALE_APP_BINARY_PATH.exists():
+        write_log(f"Tailscale app binary not found: {TAILSCALE_APP_BINARY_PATH}")
+        return False
+
+    wrapper_script = f'#!/bin/sh\nexec {TAILSCALE_APP_BINARY_PATH} "$@"\n'
+    shell_command = (
+        "mkdir -p /usr/local/bin && "
+        f"printf %s {shlex.quote(wrapper_script)} > {TAILSCALE_CLI_WRAPPER_PATH} && "
+        f"chmod +x {TAILSCALE_CLI_WRAPPER_PATH}"
+    )
+    result = subprocess.run(
+        [
+            "osascript",
+            "-e",
+            f"do shell script {quote_applescript_string(shell_command)} with administrator privileges",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=120,
+        check=False,
+    )
+    write_log(f"Tailscale CLI wrapper installer return code: {result.returncode}")
+    if result.stdout:
+        write_log(f"Tailscale CLI wrapper installer stdout: {result.stdout.strip()}")
+    if result.stderr:
+        write_log(f"Tailscale CLI wrapper installer stderr: {result.stderr.strip()}")
+
+    if result.returncode == 0 and find_tailscale_command() is not None:
+        write_log("Tailscale CLI wrapper installed successfully.")
+        return True
+
+    write_log(
+        "Tailscale CLI wrapper installer did not make a usable CLI command available."
+    )
+    return False
+
+
 def run_tailscale_command(args: list[str]) -> subprocess.CompletedProcess[str] | None:
     """Run a Tailscale command and write the result to the launcher log."""
     tailscale_command = find_tailscale_command()
     if tailscale_command is None:
-        write_log(
-            "Tailscale CLI command not found. Install it from Tailscale settings or run the bundled InstallTailscaleCLI.scpt."
-        )
-        show_tailscale_help()
-        return None
+        write_log("Tailscale CLI command not found. Trying to install it.")
+        if not install_tailscale_cli():
+            return None
+        tailscale_command = find_tailscale_command()
+        if tailscale_command is None:
+            write_log(
+                "Tailscale CLI command is still not available after installation."
+            )
+            return None
 
     command = [tailscale_command, *args]
     write_log(f"Tailscale command: {' '.join(command)}")
