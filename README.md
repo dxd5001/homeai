@@ -4,6 +4,12 @@
 
 # Home AI
 
+<p align="center">
+  <img src="https://img.shields.io/badge/version-v0.1.0-blue" alt="Version v0.1.0">
+  <img src="https://img.shields.io/badge/platform-macOS-lightgrey" alt="macOS">
+  <img src="https://img.shields.io/badge/LLM-local%20first-green" alt="Local-first LLM">
+</p>
+
 ![Home AI Banner](static/banner.png)
 
 A home AI assistant built with LangChain. **Primarily uses local LLMs** with OpenAI as an optional provider.
@@ -123,6 +129,7 @@ pyinstaller --windowed --onedir --name "Home AI Launcher" web_launcher.py \
   --icon "static/homeai_logo.icns" \
   --add-data "web_chatbot.py:." \
   --add-data "prompts.py:." \
+  --add-data "version.py:." \
   --add-data "static:static" \
   --collect-all streamlit \
   --hidden-import "streamlit.web.cli"

@@ -20,6 +20,7 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.output_parsers import StrOutputParser
 from PIL import Image
 from prompts import PromptTemplates
+from version import APP_VERSION
 
 # Load environment variables from .env file
 load_dotenv()
@@ -220,6 +221,9 @@ def main():
             )
         else:
             st.code("OpenAI API\nModel: gpt-4o-mini\ntemperature=0.7")
+
+        st.divider()
+        st.caption(f"Home AI v{APP_VERSION}")
 
     # Display message history
     for message in st.session_state.messages:
