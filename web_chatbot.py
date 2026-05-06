@@ -19,18 +19,55 @@ from langchain_core.chat_history import InMemoryChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.output_parsers import StrOutputParser
 from PIL import Image
+from config_manager import ConfigManager
 from prompts import PromptTemplates
 from version import APP_VERSION
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Get environment variables
-USE_LOCAL_LLM = os.getenv("USE_LOCAL_LLM", "true").lower() == "true"
-LOCAL_LLM_BASE_URL = os.getenv("LOCAL_LLM_BASE_URL", "http://localhost:1234/v1")
-LOCAL_LLM_MODEL = os.getenv("LOCAL_LLM_MODEL", "local-model")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-LANGUAGE = os.getenv("LANGUAGE", "ja")  # Default to Japanese
+CONFIG_MANAGER = ConfigManager()
+
+
+def get_config_value(key: str, env_key: str, default):
+    """Return configuration value with environment fallback."""
+    env_value = os.getenv(env_key)
+    if env_value is not None and CONFIG_MANAGER.is_first_run():
+        return env_value
+    return CONFIG_MANAGER.get(key, default)
+
+
+def get_bool_config_value(key: str, env_key: str, default: bool) -> bool:
+    """Return boolean configuration value with environment fallback."""
+    value = get_config_value(key, env_key, default)
+    if isinstance(value, str):
+        return value.lower() == "true"
+    return bool(value)
+
+
+USE_LOCAL_LLM = get_bool_config_value(
+    "use_local_llm",
+    "USE_LOCAL_LLM",
+    ConfigManager.DEFAULT_CONFIG["use_local_llm"],
+)
+LOCAL_LLM_BASE_URL = get_config_value(
+    "local_llm_base_url",
+    "LOCAL_LLM_BASE_URL",
+    ConfigManager.DEFAULT_CONFIG["local_llm_base_url"],
+)
+LOCAL_LLM_MODEL = get_config_value(
+    "local_llm_model",
+    "LOCAL_LLM_MODEL",
+    ConfigManager.DEFAULT_CONFIG["local_llm_model"],
+)
+OPENAI_API_KEY = get_config_value(
+    "openai_api_key",
+    "OPENAI_API_KEY",
+    ConfigManager.DEFAULT_CONFIG["openai_api_key"],
+)
+LANGUAGE = get_config_value(
+    "language", "LANGUAGE", ConfigManager.DEFAULT_CONFIG["language"]
+)
 
 
 def get_base_path() -> Path:
@@ -146,6 +183,30 @@ def get_chain_with_history():
     )
 
 
+def save_web_settings(
+    selected_language: str,
+    use_local_llm: bool,
+    local_llm_base_url: str,
+    local_llm_model: str,
+    openai_api_key: str,
+) -> None:
+    """Save web UI settings and reload cached resources."""
+    CONFIG_MANAGER.update(
+        {
+            "language": selected_language,
+            "use_local_llm": use_local_llm,
+            "local_llm_base_url": local_llm_base_url,
+            "local_llm_model": local_llm_model,
+            "openai_api_key": openai_api_key,
+            "first_run": False,
+        }
+    )
+    get_model.clear()
+    get_prompt.clear()
+    get_chain.clear()
+    st.rerun()
+
+
 # -----------------------------------------------
 # 5. Streamlit UI
 # -----------------------------------------------
@@ -191,8 +252,45 @@ def main():
 
         # Update language if changed
         if selected_language != LANGUAGE:
-            os.environ["LANGUAGE"] = selected_language
+            CONFIG_MANAGER.set("language", selected_language)
+            CONFIG_MANAGER.mark_first_run_complete()
             st.rerun()
+
+        st.divider()
+        st.subheader("LLM Settings")
+        llm_provider = st.radio(
+            "Provider",
+            options=["Local LLM", "OpenAI API"],
+            index=0 if USE_LOCAL_LLM else 1,
+            horizontal=True,
+        )
+        selected_use_local_llm = llm_provider == "Local LLM"
+        settings_local_llm_base_url = st.text_input(
+            "Local LLM Base URL",
+            value=LOCAL_LLM_BASE_URL,
+            help="Example: http://127.0.0.1:1235/v1",
+            disabled=not selected_use_local_llm,
+        )
+        settings_local_llm_model = st.text_input(
+            "Local LLM Model",
+            value=LOCAL_LLM_MODEL,
+            help="Use the model name shown by your local LLM server.",
+            disabled=not selected_use_local_llm,
+        )
+        settings_openai_api_key = st.text_input(
+            "OpenAI API Key",
+            value=OPENAI_API_KEY,
+            type="password",
+            disabled=selected_use_local_llm,
+        )
+        if st.button("Save LLM Settings", type="primary"):
+            save_web_settings(
+                selected_language,
+                selected_use_local_llm,
+                settings_local_llm_base_url.strip(),
+                settings_local_llm_model.strip(),
+                settings_openai_api_key.strip(),
+            )
 
         # Session management
         session_id = st.text_input(

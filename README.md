@@ -103,6 +103,7 @@ python web_launcher.py
 The launcher provides:
 - Starts Streamlit on `http://localhost:8501`
 - Opens the default browser automatically
+- Web UI settings for local LLM URL, model name, provider, and OpenAI API key
 - Menu bar/tray menu to reopen Home AI
 - Start Tailscale Serve for port `8501`
 - Stop Tailscale Serve
@@ -113,6 +114,8 @@ The launcher provides:
 The launcher automatically looks for the Tailscale command in common CLI locations such as `/usr/local/bin/tailscale`, `/opt/homebrew/bin/tailscale`, `/usr/bin/tailscale`, and `PATH`. If the CLI is not found on macOS, the launcher tries to install the Tailscale CLI from `/Applications/Tailscale.app`; the first use may ask for administrator permission. If Tailscale is not installed, the launcher opens the macOS download page.
 
 Launcher logs are stored at `~/.homeai/logs/web_launcher.log`. When the log exceeds 1MB, it is rotated to `web_launcher.log.1`.
+
+Web UI settings are saved to `~/.homeai/config.json`.
 
 **Note**: `Stop Tailscale Serve` runs `tailscale serve reset`, which may remove other Tailscale Serve settings on the machine.
 
@@ -129,6 +132,7 @@ pyinstaller --windowed --onedir --name "Home AI Launcher" web_launcher.py \
   --icon "static/homeai_logo.icns" \
   --add-data "web_chatbot.py:." \
   --add-data "prompts.py:." \
+  --add-data "config_manager.py:." \
   --add-data "version.py:." \
   --add-data "static:static" \
   --collect-all streamlit \
