@@ -91,6 +91,8 @@ The launcher provides:
 
 The launcher automatically looks for the Tailscale command in common locations. It prefers CLI launcher paths such as `/usr/local/bin/tailscale` and `/opt/homebrew/bin/tailscale`, then falls back to `/Applications/Tailscale.app/Contents/MacOS/Tailscale`, and finally checks `PATH`.
 
+Launcher logs are stored at `~/.homeai/logs/web_launcher.log`. When the log exceeds 1MB, it is rotated to `web_launcher.log.1`.
+
 **Note**: `Stop Tailscale Serve` runs `tailscale serve reset`, which may remove other Tailscale Serve settings on the machine.
 
 #### Building Web Launcher

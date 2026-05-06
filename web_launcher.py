@@ -22,6 +22,7 @@ PORT = 8501
 URL = f"http://localhost:{PORT}"
 STARTUP_TIMEOUT_SECONDS = 30
 STREAMLIT_CHILD_ARG = "--streamlit-child"
+MAX_LOG_SIZE_BYTES = 1_000_000
 TAILSCALE_CANDIDATE_PATHS = [
     "/usr/local/bin/tailscale",
     "/opt/homebrew/bin/tailscale",
@@ -52,10 +53,23 @@ def get_log_path() -> Path:
     return log_dir / "web_launcher.log"
 
 
+def rotate_log_if_needed(log_path: Path) -> None:
+    """Rotate the launcher log when it exceeds the maximum size."""
+    if not log_path.exists() or log_path.stat().st_size <= MAX_LOG_SIZE_BYTES:
+        return
+
+    rotated_log_path = log_path.with_name(f"{log_path.name}.1")
+    if rotated_log_path.exists():
+        rotated_log_path.unlink()
+    log_path.rename(rotated_log_path)
+
+
 def write_log(message: str) -> None:
     """Write a message to the launcher log file."""
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-    with open(get_log_path(), "a", encoding="utf-8") as log_file:
+    log_path = get_log_path()
+    rotate_log_if_needed(log_path)
+    with open(log_path, "a", encoding="utf-8") as log_file:
         log_file.write(f"[{timestamp}] {message}\n")
 
 
