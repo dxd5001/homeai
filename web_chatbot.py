@@ -62,7 +62,7 @@ def get_image_data_uri(filename: str) -> str | None:
     return f"data:image/png;base64,{encoded_image}"
 
 
-PAGE_ICON = load_image("homeai_logo-8.png") or "💬"
+PAGE_ICON = load_image("homeai_logo@2x.png") or "💬"
 HEADER_LOGO_DATA_URI = get_image_data_uri("homeai_logo@2x.png")
 
 # -----------------------------------------------
