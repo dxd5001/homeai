@@ -187,8 +187,14 @@ def run_tailscale_command(args: list[str]) -> subprocess.CompletedProcess[str] |
         write_log(f"Tailscale stderr: {result.stderr.strip()}")
     if "Tailscale GUI failed to start" in result.stdout:
         write_log("Detected Tailscale app binary instead of a usable CLI command.")
-        show_tailscale_help()
     return result
+
+
+def is_tailscale_gui_error(result: subprocess.CompletedProcess[str] | None) -> bool:
+    """Return whether the Tailscale command failed as a GUI launch."""
+    if result is None:
+        return True
+    return "Tailscale GUI failed to start" in result.stdout
 
 
 def show_tailscale_status() -> None:
@@ -198,8 +204,16 @@ def show_tailscale_status() -> None:
 
 def start_tailscale_serve() -> None:
     """Start Tailscale Serve for the Streamlit port."""
-    show_tailscale_status()
-    run_tailscale_command(["serve", "--bg", str(PORT)])
+    status_result = run_tailscale_command(["serve", "status"])
+    if is_tailscale_gui_error(status_result):
+        write_log("Tailscale Serve start skipped because Tailscale CLI is not usable.")
+        return
+
+    serve_result = run_tailscale_command(["serve", "--bg", str(PORT)])
+    if is_tailscale_gui_error(serve_result):
+        write_log("Tailscale Serve status check skipped because start failed.")
+        return
+
     show_tailscale_status()
 
 
