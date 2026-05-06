@@ -46,6 +46,11 @@ def get_web_chatbot_path() -> Path:
     return get_base_path() / "web_chatbot.py"
 
 
+def get_tray_icon_path() -> Path:
+    """Return the tray icon image path."""
+    return get_base_path() / "static" / "homeai_icon-8.png"
+
+
 def get_log_path() -> Path:
     """Return launcher log file path."""
     log_dir = Path.home() / ".homeai" / "logs"
@@ -94,6 +99,10 @@ def wait_for_streamlit() -> bool:
 
 def create_icon_image() -> Image.Image:
     """Create a simple tray icon image."""
+    tray_icon_path = get_tray_icon_path()
+    if tray_icon_path.exists():
+        return Image.open(tray_icon_path).convert("RGBA")
+
     image = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
     draw.rounded_rectangle((8, 8, 56, 56), radius=12, fill=(37, 99, 235, 255))

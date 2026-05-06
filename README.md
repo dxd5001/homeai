@@ -1,6 +1,8 @@
-# Home AI
+<p align="center">
+  <img src="static/homeai_logo@2x.png" alt="Home AI" width="180">
+</p>
 
-![Home AI Banner](static/banner.png)
+# Home AI
 
 A home AI assistant built with LangChain. **Primarily uses local LLMs** with OpenAI as an optional provider.
 
@@ -116,8 +118,10 @@ pip install pyinstaller
 
 # Build the launcher
 pyinstaller --windowed --onedir --name "Home AI Launcher" web_launcher.py \
+  --icon "static/homeai_logo.icns" \
   --add-data "web_chatbot.py:." \
   --add-data "prompts.py:." \
+  --add-data "static/homeai_icon-8.png:static" \
   --collect-all streamlit \
   --hidden-import "streamlit.web.cli"
 ```
