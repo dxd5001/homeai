@@ -26,7 +26,6 @@ MAX_LOG_SIZE_BYTES = 1_000_000
 TAILSCALE_CANDIDATE_PATHS = [
     "/usr/local/bin/tailscale",
     "/opt/homebrew/bin/tailscale",
-    "/Applications/Tailscale.app/Contents/MacOS/Tailscale",
     "/usr/bin/tailscale",
 ]
 
@@ -167,7 +166,9 @@ def run_tailscale_command(args: list[str]) -> subprocess.CompletedProcess[str] |
     """Run a Tailscale command and write the result to the launcher log."""
     tailscale_command = find_tailscale_command()
     if tailscale_command is None:
-        write_log("Tailscale command not found.")
+        write_log(
+            "Tailscale CLI command not found. Install it from Tailscale settings or run the bundled InstallTailscaleCLI.scpt."
+        )
         show_tailscale_help()
         return None
 
@@ -293,6 +294,10 @@ def run_streamlit_child() -> None:
         str(PORT),
         "--server.headless",
         "true",
+        "--server.enableCORS",
+        "false",
+        "--server.enableXsrfProtection",
+        "false",
         "--global.developmentMode",
         "false",
     ]
