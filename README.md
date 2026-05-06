@@ -67,6 +67,17 @@ LOCAL_LLM_MODEL=google/gemma-4-e4b  # Change to your actual model name
 # USE_LOCAL_LLM=false
 ```
 
+Home AI works with local LLM servers that provide an OpenAI-compatible API. Examples include:
+
+| Server | Example base URL | Notes |
+|---|---|---|
+| LM Studio | `http://127.0.0.1:1235/v1` | Use the port shown in LM Studio server settings |
+| Ollama | `http://127.0.0.1:11434/v1` | Use Ollama's OpenAI-compatible endpoint |
+| llama.cpp | `http://127.0.0.1:8080/v1` | Start `llama-server` with OpenAI-compatible API support |
+| vLLM | `http://127.0.0.1:8000/v1` | Start vLLM with its OpenAI-compatible API server |
+
+Set `LOCAL_LLM_BASE_URL` to the server's `/v1` endpoint and `LOCAL_LLM_MODEL` to the model name recognized by that server.
+
 ### 5. Run
 
 #### Web Launcher (Recommended)
@@ -218,13 +229,13 @@ Ending conversation. See you again!
 
 ## 🌐 Remote Access
 
-When using local LLMs (LM Studio, llama.cpp), you can access your HomeAI remotely from your smartphone using Tailscale Serve for private access within your Tailnet.
+When using local LLMs through an OpenAI-compatible API server such as LM Studio, Ollama, llama.cpp, or vLLM, you can access your HomeAI remotely from your smartphone using Tailscale Serve for private access within your Tailnet.
 
 ### Prerequisites
 
 1. **Tailscale account**: Register at https://tailscale.com
 2. **Tailscale client**: Install on home PC and smartphone
-3. **Local LLM (LM Studio, etc.)**: Running in API server mode
+3. **Local LLM (LM Studio, Ollama, llama.cpp, vLLM, etc.)**: Running in OpenAI-compatible API server mode
 
 ### Setup Steps
 
