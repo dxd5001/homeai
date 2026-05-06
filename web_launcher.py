@@ -161,6 +161,11 @@ def show_tailscale_help() -> None:
     webbrowser.open("https://tailscale.com/kb/1312/serve")
 
 
+def show_tailscale_download() -> None:
+    """Open Tailscale download page."""
+    webbrowser.open("https://tailscale.com/download/mac")
+
+
 def quote_applescript_string(value: str) -> str:
     """Quote a string for AppleScript source."""
     return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
@@ -178,7 +183,7 @@ def install_tailscale_cli() -> bool:
     """Install the Tailscale CLI using the official bundled installer."""
     if not TAILSCALE_APP_PATH.exists():
         write_log("Tailscale app not found at /Applications/Tailscale.app.")
-        show_tailscale_help()
+        show_tailscale_download()
         return False
 
     if not TAILSCALE_CLI_INSTALL_SCRIPT_PATH.exists():

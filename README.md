@@ -104,7 +104,7 @@ The launcher provides:
 - Tailscale Serve help link
 - Quit menu that stops Streamlit
 
-The launcher automatically looks for the Tailscale command in common CLI locations such as `/usr/local/bin/tailscale`, `/opt/homebrew/bin/tailscale`, `/usr/bin/tailscale`, and `PATH`. If the CLI is not found on macOS, the launcher tries to install the Tailscale CLI from `/Applications/Tailscale.app`; the first use may ask for administrator permission.
+The launcher automatically looks for the Tailscale command in common CLI locations such as `/usr/local/bin/tailscale`, `/opt/homebrew/bin/tailscale`, `/usr/bin/tailscale`, and `PATH`. If the CLI is not found on macOS, the launcher tries to install the Tailscale CLI from `/Applications/Tailscale.app`; the first use may ask for administrator permission. If Tailscale is not installed, the launcher opens the macOS download page.
 
 Launcher logs are stored at `~/.homeai/logs/web_launcher.log`. When the log exceeds 1MB, it is rotated to `web_launcher.log.1`.
 
