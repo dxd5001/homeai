@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="static/homeai_logo@2x.png" alt="Home AI" width="180">
+  <img src="static/homeai_logo@2x.png" alt="Home AI" width="400">
 </p>
 
 # Home AI
