@@ -226,10 +226,12 @@ def setup_tray() -> pystray.Icon:
     """Create and return tray icon."""
     menu = pystray.Menu(
         pystray.MenuItem("Open Home AI", lambda: open_home_ai()),
+        pystray.Menu.SEPARATOR,
         pystray.MenuItem("Start Tailscale Serve", lambda: start_tailscale_serve()),
         pystray.MenuItem("Stop Tailscale Serve", lambda: stop_tailscale_serve()),
         pystray.MenuItem("Show Tailscale Status", lambda: show_tailscale_status()),
         pystray.MenuItem("Tailscale Serve Help", lambda: show_tailscale_help()),
+        pystray.Menu.SEPARATOR,
         pystray.MenuItem("Quit", quit_app),
     )
     return pystray.Icon(APP_NAME, create_icon_image(), APP_NAME, menu)
