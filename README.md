@@ -124,6 +124,8 @@ pyinstaller --windowed --onedir --name "Home AI Launcher" web_launcher.py \
   --add-data "web_chatbot.py:." \
   --add-data "prompts.py:." \
   --add-data "static/homeai_icon-8.png:static" \
+  --add-data "static/homeai_logo@2x.png:static" \
+  --add-data "static/homeai_logo-8.png:static" \
   --collect-all streamlit \
   --hidden-import "streamlit.web.cli"
 ```

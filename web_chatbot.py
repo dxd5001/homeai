@@ -8,12 +8,16 @@ Browser will automatically open at http://localhost:8501
 """
 
 import os
+import sys
+from pathlib import Path
+
 import streamlit as st
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_core.chat_history import InMemoryChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.output_parsers import StrOutputParser
+from PIL import Image
 from prompts import PromptTemplates
 
 # Load environment variables from .env file
@@ -26,12 +30,36 @@ LOCAL_LLM_MODEL = os.getenv("LOCAL_LLM_MODEL", "local-model")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 LANGUAGE = os.getenv("LANGUAGE", "ja")  # Default to Japanese
 
+
+def get_base_path() -> Path:
+    """Return base path for both source and PyInstaller bundle execution."""
+    if getattr(sys, "frozen", False):
+        return Path(sys._MEIPASS)
+    return Path(__file__).resolve().parent
+
+
+def get_static_image_path(filename: str) -> Path:
+    """Return a static image path."""
+    return get_base_path() / "static" / filename
+
+
+def load_image(filename: str) -> Image.Image | None:
+    """Load a static image if it exists."""
+    image_path = get_static_image_path(filename)
+    if image_path.exists():
+        return Image.open(image_path)
+    return None
+
+
+PAGE_ICON = load_image("homeai_logo-8.png") or "💬"
+HEADER_LOGO = load_image("homeai_logo@2x.png")
+
 # -----------------------------------------------
 # Streamlit page configuration
 # -----------------------------------------------
 st.set_page_config(
     page_title="HomeAI",
-    page_icon="💬",
+    page_icon=PAGE_ICON,
     layout="centered",
 )
 
@@ -121,7 +149,14 @@ def main():
     labels = ui_labels.get(LANGUAGE, ui_labels["en"])
 
     # Header
-    st.title(f"💬 {labels['title']}")
+    if HEADER_LOGO is not None:
+        left_column, right_column = st.columns([1, 5], vertical_alignment="center")
+        with left_column:
+            st.image(HEADER_LOGO, width=72)
+        with right_column:
+            st.title(labels["title"])
+    else:
+        st.title(f"💬 {labels['title']}")
     st.caption(labels["caption"])
 
     # Sidebar: Settings
