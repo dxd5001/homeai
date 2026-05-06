@@ -23,8 +23,9 @@ URL = f"http://localhost:{PORT}"
 STARTUP_TIMEOUT_SECONDS = 30
 STREAMLIT_CHILD_ARG = "--streamlit-child"
 TAILSCALE_CANDIDATE_PATHS = [
-    "/opt/homebrew/bin/tailscale",
     "/usr/local/bin/tailscale",
+    "/opt/homebrew/bin/tailscale",
+    "/Applications/Tailscale.app/Contents/MacOS/Tailscale",
     "/usr/bin/tailscale",
 ]
 
