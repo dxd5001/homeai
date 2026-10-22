@@ -1,17 +1,17 @@
 # LangChain チャットボット 依存パッケージ
 # インストール: pip install -r requirements.txt
 
-langchain==0.3.25
-langchain-openai==1.1.14
-langchain-core==0.3.58
-openai==1.77.0
+langchain==1.4.7
+langchain-openai==1.7.2
+langchain-core==1.6.13
+openai==3.31.0
 python-dotenv==1.2.2
-streamlit==1.39.0
+streamlit==1.66.1
 pystray==0.19.5
-Pillow==10.4.0
+Pillow==12.3.0
 
 # eMudhra intermediate CA compromise: drop the compromised emSign ECC Root CA - G3
 certifi>=2026.10.19
 
 # PyQt6 for desktop app
-PyQt6==6.7.0
+PyQt6==6.11.0
