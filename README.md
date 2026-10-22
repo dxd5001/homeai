@@ -5,9 +5,10 @@
 # Home AI
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-v0.1.0-blue" alt="Version v0.1.0">
+  <img src="https://img.shields.io/badge/version-v0.1.1-blue" alt="Version v0.1.1">
   <img src="https://img.shields.io/badge/platform-macOS-lightgrey" alt="macOS">
   <img src="https://img.shields.io/badge/LLM-local%20first-green" alt="Local-first LLM">
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT">
 </p>
 
 ![Home AI Banner](static/banner.png)
@@ -32,6 +33,8 @@ A home AI assistant built with LangChain. **Primarily uses local LLMs** with Ope
 ```
 
 ## Setup
+
+**Requires Python 3.10 or later** (developed and tested on Python 3.14).
 
 ### 1. Clone repository
 
@@ -341,3 +344,22 @@ Home PC
     ↓ localhost
 Streamlit → Local LLM
 ```
+
+---
+
+## Security
+
+This app is designed for **personal, private-network use**. Please be aware of the following:
+
+- **No built-in authentication**: the Web UI trusts anyone who can reach the port. `streamlit run` listens on all interfaces (`0.0.0.0:8501`), so on a plain launch the app is reachable from other devices on the same LAN. Keep it on localhost or behind Tailscale Serve, and never expose port 8501 to the public internet.
+- **Plaintext credentials**: the OpenAI API key is stored unencrypted in `~/.homeai/config.json` (Web UI settings) or `.env`. `.env` is excluded from Git via `.gitignore` — never commit it. macOS Keychain integration is not implemented yet.
+- **Session data**: conversation history lives in memory only and is cleared on restart.
+- **Reporting**: if you find a security issue, please open a GitHub issue.
+
+## Future Plans
+
+The long-term direction is an Obsidian-based personal knowledge base with a local-first LLM assistant, accessible anywhere over a private Tailnet. See the draft architecture spec under `.kiro/specs/homeai-orb-architecture/`.
+
+## License
+
+MIT License — see [LICENSE](LICENSE).
