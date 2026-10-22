@@ -22,8 +22,15 @@ env/
 # IDE
 .idea/
 .vscode/
+.claude/
 *.swp
 *.swo
+
+# AI tool state (keep spec docs under .kiro/specs/)
+.config.kiro
+
+# Release artifacts (use GitHub Releases assets)
+*.zip
 
 # macOS
 .DS_Store
