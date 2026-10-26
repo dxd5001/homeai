@@ -8,8 +8,50 @@ updates:
       time: "09:00"
       timezone: "Asia/Tokyo"
     open-pull-requests-limit: 5
+    groups:
+      langchain:
+        patterns:
+          - "langchain*"
+          - "langgraph*"
+          - "langsmith*"
+          - "openai"
+          - "tiktoken"
+      python-dependencies:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "langchain*"
+          - "langgraph*"
+          - "langsmith*"
+          - "openai"
+          - "tiktoken"
+    reviewers:
+      - "dxd5001"
+    assignees:
+      - "dxd5001"
     labels:
       - "dependencies"
       - "python"
     commit-message:
       prefix: "deps"
+      include: "scope"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:15"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 2
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    reviewers:
+      - "dxd5001"
+    assignees:
+      - "dxd5001"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
