@@ -3,7 +3,7 @@
 
 langchain==1.4.7
 langchain-openai==1.7.2
-langchain-core==1.6.13
+langchain-core==1.7.0
 openai==3.31.0
 python-dotenv==1.2.2
 streamlit==1.66.1
