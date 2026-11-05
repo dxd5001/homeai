@@ -11,7 +11,7 @@ pystray==0.19.5
 Pillow==13.0.0
 
 # eMudhra intermediate CA compromise: drop the compromised emSign ECC Root CA - G3
-certifi>=2026.10.19
+certifi>=2026.10.23
 
 # PyQt6 for desktop app
-PyQt6==6.11.0
+PyQt6==6.12.0
