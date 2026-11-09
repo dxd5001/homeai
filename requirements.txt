@@ -1,10 +1,10 @@
 # LangChain チャットボット 依存パッケージ
 # インストール: pip install -r requirements.txt
 
-langchain==1.4.7
-langchain-openai==1.7.3
-langchain-core==1.7.3
-openai==3.41.0
+langchain==1.4.9
+langchain-openai==1.7.4
+langchain-core==1.7.6
+openai==3.46.0
 python-dotenv==1.2.4
 streamlit==1.66.1
 pystray==0.19.5
